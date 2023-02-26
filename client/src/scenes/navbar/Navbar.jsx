@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Box,
   IconButton,
@@ -25,6 +25,10 @@ import { setIsProfile, setMode } from 'state/state';
 import { setLogout } from 'state/state';
 import { useNavigate } from 'react-router-dom';
 import Flexbetween from 'components/Flexbox';
+import './Navbar.css' ;
+import { setNotifications } from 'state/state';
+import UserNotification from 'scenes/notifications/Notification';
+import zIndex from '@mui/material/styles/zIndex';
 
 
 function Navbar() {
@@ -32,18 +36,54 @@ function Navbar() {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate() ;
-  const isProfile = useSelector((state)=> state.isProfile) ;
+  const inputElement = useRef()
+  
 
+
+  const {_id} = useSelector((state) => state.user);
+  const {token} = useSelector((state) => state.token) ;
+  const isProfile = useSelector((state)=> state.isProfile) ;
   const mode01 = useSelector((state) => state.mode)
-  console.log(mode01)
   const user = useSelector((state) => state.user)
+  const notifications = useSelector((state) => state.notifications) ; 
   const isNonMobile = useMediaQuery("(min-width: 1000px)") 
+
+  
+
+
 
   const neutralLight = theme.palette.neutral.light;
   const dark = theme.palette.neutral.dark;
   const background = theme.palette.background.default;
   const primaryLight = theme.palette.primary.light;
   const alt = theme.palette.background.alt;
+  const [length,setlength] = useState(notifications.length)
+
+  const notified = () => {
+
+    console.log(inputElement.current.offsetTop)
+    setlength(null)
+  }
+
+
+  const Notification  = async() =>{
+    const response = await fetch(`http://localhost:5001/posts/notifications/${_id}`,{
+      method:'GET',
+      headers: {Authorization: `Bearer ${token}`}
+    })
+    const data  = await response.json()
+    const {picturePath,firstName,lastName} = data
+   
+    dispatch(setNotifications({notifications:data}))
+    
+}
+
+
+
+  
+useEffect(() => {
+  Notification() ;
+},[])
 
   const fullName = `${user.firstName} ${user.lastName}` ;
   const profileChange = async() => {
@@ -86,7 +126,7 @@ function Navbar() {
 
       {/* Desktop */}
       {isNonMobile ? (
-        <Flexbetween gap={'1.75rem'} >
+        <Flexbetween  gap={'1.75rem'} >
           <IconButton onClick={() => dispatch(setMode())} >
             {mode01=='dark' ?
              <DarkMode  sx={{fontSize:'25px'}} /> :
@@ -94,7 +134,14 @@ function Navbar() {
             }
           </IconButton>
           <Message       sx={{fontSize:'25px'}} />
-          <Notifications sx={{fontSize:'25px'}} />
+          <IconButton ref={inputElement} onClick={notified} style={{display:'inline-block',position:'relative',zIndex:'0'}}>
+            <Notifications  sx={{fontSize:'25px'}} />
+            {notifications.length!==0 && 
+           <span style={{position:'absolute',top:'-5px',right:'-5px',padding: '1px 6px', backgroundColor:'red',color:'white',borderRadius:'50%'}}>{length}</span> }
+          </IconButton>
+          <div style={{position:'absolute',top:'20px',left:'816px'}}>
+               <UserNotification notification={notifications} />
+          </div>
           <Help          sx={{fontSize:'25px'}} />
           <FormControl variant='standard' value={fullName} >
           <Select
@@ -160,7 +207,12 @@ function Navbar() {
               <LightMode sx={{fontSize:'25px',color:{dark}}}/>}
             </IconButton>
             <Message       sx={{fontSize:'25px'}} />
-            <Notifications sx={{fontSize:'25px'}} />
+
+
+            <IconButton className='notification'>
+              <Notifications sx={{fontSize:'25px'}} />
+              
+            </IconButton>
             <Help          sx={{fontSize:'25px'}} />
             <FormControl variant='standard' value={fullName} >
             <Select

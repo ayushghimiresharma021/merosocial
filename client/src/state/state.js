@@ -8,7 +8,8 @@ const initialState = {
   advertisement : null,
   userFriends:[],
   friendship: [],
-  isProfileOrHome:'home'
+  isProfileOrHome:'home',
+  notifications:null
 };
 
 export const authSlice = createSlice({
@@ -54,10 +55,13 @@ export const authSlice = createSlice({
     },
     setIsProfileOrHome : (state,action) => {
       state.isProfileOrHome = action.payload.isProfileOrHome;
+    },
+    setNotifications: (state,actions) => {
+      state.notifications =  actions.payload.notifications
     }
   },
 });
 
-export const { setMode, setLogin, setLogout, setUserFriends, setPosts, setPost,setAdvertisement,setFriendship,setIsProfileOrHome} =
+export const { setMode, setLogin, setLogout, setUserFriends, setPosts, setPost,setAdvertisement,setFriendship,setIsProfileOrHome,setNotifications} =
   authSlice.actions;
 export default authSlice.reducer;

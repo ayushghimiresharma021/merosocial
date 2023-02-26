@@ -51,10 +51,10 @@ function Friend({friendId,name,subtitle,userPicturePath}) {
       headers: {Authorization:`Bearer ${token}`,
               "Content-Type": "application/json",}
   })
-    const data = await friend.json()
+    const data = await friend.json() ;
 
-      dispatch(setUserFriends({userFriends:data}))
-      dispatch(setFriendship({friendship:data}))
+    dispatch(setUserFriends({userFriends:data}))
+    dispatch(setFriendship({friendship:data}))
 
     
   

@@ -1,5 +1,6 @@
 import Post from "../models/Post.js"
-import User from "../models/User.js"
+import User from "../models/User.js" ;
+import Notification from "../models/notifications.js";
 
 export const createPost = async (req, res) => {
     try {
@@ -46,6 +47,17 @@ export const getFeedPosts = async (req, res) => {
     }
 }
 
+export const getNotifications = async(req,res) => {
+    try {
+        const {userId} = req.params 
+        const notifications = await Notification.find({userId:userId}) ;
+        res.status(200).json(notifications) ;
+    } catch (error) {
+        res.status(404).json({message:error.message})
+    }
+}
+
+
 export const getUserPosts = async (req, res) => {
     try {
         const {userId} = req.params
@@ -64,13 +76,27 @@ export const getLikeOrUnlike  =  async (req, res) => {
         const { userId } = req.body
 
         const post  = await Post.findById(id)
-        const isLiked = post.likes.get(userId)
+        const {firstName,lastName,picturePath} =  await User.findById(userId)
+        const isLiked = post.likes.get(userId)  
+        
 
         if(isLiked){
             post.likes.delete(userId)
+
         }
         else{
             post.likes.set(userId,true)
+            const newNotications  = new Notification({
+                userId:post.userId,
+                postId:id,
+                firstName,
+                lastName,
+                likedOrComment:'liked',
+                friendPicturePath:picturePath,
+                
+            })
+            newNotications.save()
+            
         }
         const UpdatesPost  = await Post.findByIdAndUpdate(
             id,
@@ -100,7 +126,7 @@ export const getPostedComments = async (req, res) => {
             {new:true}
         )
 
-        res.status(200).json(posted)
+        res.status(200).json(posted)    
 
     } catch (error) {
         res.status(400).json({message:error.message})
@@ -111,26 +137,35 @@ export const getComments = async(req, res) => {
     try {
         const {postId} = req.params
         const post = await Post.findById(postId)
-        console.log(post)
-        const commenting = []
-
-        post.comments.forEach((value,key) => commenting.push(key))
-        const commentUser = await Promise.all(
-           commenting.map((comment) => User.findById(comment))
-        )
-        const formattedComments = commentUser.map(
-            ({_id,firstName,lastName,picturePath}) => {
-                const comments = post.comments.get(_id)
-                const name = `${firstName} ${lastName}`
-                return {_id,name,picturePath,comments}
+        const usercomments = post.comments
+        console.log(usercomments)
+        
+        if (post.comments){
+            const commenting = []
+            post.comments.forEach((value,key) => commenting.push(key))
+            const commentUser = await Promise.all(
+                commenting.map((comment) => User.findById(comment))
+            )
+            const formattedComments = commentUser.map(
+                ({_id,firstName,lastName,picturePath}) => {
+                    const comments = post.comments.get(_id)
+                    const name = `${firstName} ${lastName}`
+                    return {_id,name,picturePath,comments}
+            })
 
             
-        })
+            
+            res.status(200).json(formattedComments)
+        }
+        else{
+            res.status(200).json('No comments')
+        }
+        
 
-
-        res.status(200).json(formattedComments)
+        
+        
     } 
     catch (error) {
-        res.status(500).json({message:error.message})
+        res.status(400).json({message:error.message})
     }
 }

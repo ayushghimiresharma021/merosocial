@@ -54,7 +54,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 mongoose.set('strictQuery', false)
-mongoose.connect(process.env.MONGO)
+mongoose.connect('mongodb+srv://ayushghimire95:admin@cluster0.z9m6bqp.mongodb.net/socialpedia')
 .then(() => {
         app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`));
 }).catch(err => console.log(err));

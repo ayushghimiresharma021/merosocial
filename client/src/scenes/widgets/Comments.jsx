@@ -20,6 +20,7 @@ function Comments({ postId,postUserId }) {
   const [commentList, setCommentList] = useState([])
   const navigate = useNavigate()
   const {palette} = useTheme()
+  const noComments = false
   const isTrue = Boolean(userFriends.find(({_id}) => postUserId===_id ))
   console.log(isTrue)
   
@@ -54,6 +55,7 @@ function Comments({ postId,postUserId }) {
     },
       body: JSON.stringify({ comment:comments }),
     })
+
     setComments('')
     getComments()
   }
@@ -68,12 +70,40 @@ function Comments({ postId,postUserId }) {
       headers: { Authorization: `Bearer ${token}` },
     })
     const commented = await response.json()
+    if (commented==='No comments'){
+      noComments=true
+    }
     setCommentList(commented) 
 
   }
   useEffect(() => {
     getComments() ;
   }, [])
+  if (noComments){
+    return (
+      <Box mt='0.6rem'>
+        <Flexbetween>
+      <Box width={'40px'} height={'40px'} m='10px' >
+                  <img
+                      style={{ objectFit: "cover", borderRadius: "50%" }}
+                      width={'40px'}
+                      height={'40px'}
+                      alt="user"
+                      src={`http://localhost:5001/assets/${picturePath}`}
+                    />
+        </Box>
+
+        <Flexbetween backgroundColor={neutralLight} width='100%' borderRadius='5px' gap='3rem' padding={'0.1rem 1rem'}>
+          <InputBase width='100%' onChange={(e) => setComments(e.target.value)} value={comments} placeholder={`${firstName} ${lastName}`} />
+          <IconButton disabled={!comments}  onClick={() => submitComment() } >
+            <Send />
+          </IconButton>
+        </Flexbetween>
+
+      </Flexbetween>
+      </Box>
+    )
+  }
 
 
 
