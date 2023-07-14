@@ -8,6 +8,7 @@ import { CssBaseline } from "@mui/material";
 import { themeSettings } from "theme";
 import { ThemeProvider } from "@mui/material/styles";
 import { createTheme } from "@mui/material";
+import Chat from "scenes/chat/Chat";
 
 function App() {
   const mode = useSelector((state) => state.mode) ;
@@ -23,6 +24,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Login />} />
           <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/chat" element={<Chat/>}  />
         </Routes>
        </ThemeProvider>
       </BrowserRouter>

@@ -19,15 +19,16 @@ import {
   Help,
   Menu,
   Close,
+  Lens,
 } from "@mui/icons-material";
 import { useSelector,useDispatch } from 'react-redux';
-import { setIsProfile, setMode } from 'state/state';
+import { setIsProfile, setMode, setVisible } from 'state/state';
 import { setLogout } from 'state/state';
 import { useNavigate } from 'react-router-dom';
 import Flexbetween from 'components/Flexbox';
 import './Navbar.css' ;
 import { setNotifications } from 'state/state';
-import UserNotification from 'scenes/notifications/Notification';
+import UserNotification from 'scenes/notifications/UserNotification';
 import zIndex from '@mui/material/styles/zIndex';
 
 
@@ -39,14 +40,14 @@ function Navbar() {
   const inputElement = useRef()
   
 
-
+  
   const {_id} = useSelector((state) => state.user);
   const {token} = useSelector((state) => state.token) ;
   const isProfile = useSelector((state)=> state.isProfile) ;
   const mode01 = useSelector((state) => state.mode)
   const user = useSelector((state) => state.user)
   const notifications = useSelector((state) => state.notifications) ; 
-  const isNonMobile = useMediaQuery("(min-width: 1000px)") 
+  const isNonMobile = useMediaQuery("(min-width: 1000px)")
 
   
 
@@ -57,12 +58,27 @@ function Navbar() {
   const background = theme.palette.background.default;
   const primaryLight = theme.palette.primary.light;
   const alt = theme.palette.background.alt;
-  const [length,setlength] = useState(notifications.length)
+  var len = 0
+  if(notifications){
+     len  =  notifications.length
+  }
+  
+  
+
+  
+  
+  const [length,setlength] = useState(len)
+  const chatButton = () => {
+    navigate('/chat')
+  }
+  
+  
 
   const notified = () => {
 
     console.log(inputElement.current.offsetTop)
-    setlength(null)
+    dispatch(setVisible())
+    
   }
 
 
@@ -75,6 +91,7 @@ function Navbar() {
     const {picturePath,firstName,lastName} = data
    
     dispatch(setNotifications({notifications:data}))
+    
     
 }
 
@@ -92,7 +109,7 @@ useEffect(() => {
   }
 
   return (
-    <Flexbetween padding={'1rem 6%'} backgroundColor={alt} >
+    <Flexbetween position={'fixed'}  width={'1300px'} zIndex={'1'} top='0px' borderRadius={'3px'}  padding={'1rem 6%'} backgroundColor={alt}  >
       <Flexbetween gap={'1.75rem'} >
         <Typography 
           onClick={profileChange} 
@@ -133,15 +150,15 @@ useEffect(() => {
              <LightMode sx={{fontSize:'25px'}} />
             }
           </IconButton>
-          <Message       sx={{fontSize:'25px'}} />
+          <IconButton onClick={chatButton}>
+            <Message  sx={{fontSize:'25px'}} />
+          </IconButton>
           <IconButton ref={inputElement} onClick={notified} style={{display:'inline-block',position:'relative',zIndex:'0'}}>
             <Notifications  sx={{fontSize:'25px'}} />
-            {notifications.length!==0 && 
+            {len!=0 &&
            <span style={{position:'absolute',top:'-5px',right:'-5px',padding: '1px 6px', backgroundColor:'red',color:'white',borderRadius:'50%'}}>{length}</span> }
           </IconButton>
-          <div style={{position:'absolute',top:'20px',left:'816px'}}>
-               <UserNotification notification={notifications} />
-          </div>
+          
           <Help          sx={{fontSize:'25px'}} />
           <FormControl variant='standard' value={fullName} >
           <Select
@@ -244,6 +261,7 @@ useEffect(() => {
           </Flexbetween>
         </Box>
       )}
+
 
 
     </Flexbetween>

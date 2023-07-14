@@ -70,6 +70,9 @@ const Profile = () => {
         display={isNonMobileScreens ? "flex" : "block"}
         gap="2rem"
         justifyContent="center"
+        position={'absolute'}
+        top = '70px'
+        zIndex={'0'}
       >
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
           <UserWidget  userId={userId} picturePath={user.picturePath} />
@@ -79,7 +82,7 @@ const Profile = () => {
         <Box flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          <button style={{width:'100%',height:'40px',backgroundColor:mode==='dark'?'#3C6255':'#A6BB8D',borderRadius:'3px',color:mode==='dark'?'black':'white',border:'none',cursor:'pointer'}}>Add Friend</button>
+          
           <Box m={'2rem 0'} />
           <PostsWidget userId={userId} isProfile={true} />
         </Box>

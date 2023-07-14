@@ -12,14 +12,19 @@ import { register } from "./controllers/auth.js";
 import authRoutes from './Routes/auth.js'
 import userRoutes from './Routes/user.js';
 import postRoutes from './Routes/post.js';
+import messageRoutes from './Routes/message.js';
 import { verfiyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
-
+import { Server } from "socket.io";
 import { users } from "./data/data.js";
 import { posts } from "./data/data.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import Advertisement from "./models/Advertisement.js";
+import http from 'http';
+import Message from "./models/Message.js";
+import { messages } from "./data/Message.js";
+
 
 
 
@@ -40,8 +45,18 @@ app.use(bodyParser.json({extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
+const server = http.createServer(app)
+const io = new Server(server,{
+        cors: {
+          origin: 'http://localhost:3000',
+          methods: ['GET', 'POST'],
+          allowedHeaders: ['my-custom-header'],
+          credentials: true
+        }
+}) ;
 
-{/* File storage */ }
+
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "public/assets");
@@ -51,19 +66,44 @@ const storage = multer.diskStorage({
     }
 });
 
+server.listen(3001,() =>{
+    console.log('server is running on server 3001')
+})
+
 const upload = multer({ storage: storage });
 
 mongoose.set('strictQuery', false)
 mongoose.connect('mongodb+srv://ayushghimire95:admin@cluster0.z9m6bqp.mongodb.net/socialpedia')
 .then(() => {
         app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`));
+        
+        
 }).catch(err => console.log(err));
 
+io.on('connection', (socket) => {
+    console.log('User connection')
+    socket.on('sendMessage', async({senderId,receiverId,msgs,fromSelf}) => {
+        console.log('Received message')
+        const newMessage = new Message({senderId,receiverId,message:msgs,fromSelf:true})
+        const newMessage2 =  new Message({senderId:receiverId,receiverId:senderId,message:msgs,fromSelf:false})
+        await newMessage.save()
+            
+        await newMessage2.save() ;
+        io.emit('sendMessage', newMessage)
+        
+        
+    })
+    socket.on('disconnect', () => {
+        console.log('User disconnected')
+    })
+
+}) ;
 
 
-{/* for uploading the data in the server ,we first have to make an id for the site so this is udes at first */ }
+
 app.post('/auth/register', upload.single('picture'), register);
 app.post('/posts', upload.single('picture'), createPost)
+
 
 
 
@@ -83,3 +123,4 @@ app.get('/advertisement',verfiyToken, async (req, res) => {
 app.use('/auth', authRoutes)
 app.use('/user', userRoutes)
 app.use('/posts', postRoutes)
+app.use('/message',messageRoutes)

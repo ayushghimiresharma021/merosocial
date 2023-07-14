@@ -51,6 +51,7 @@ export const getNotifications = async(req,res) => {
     try {
         const {userId} = req.params 
         const notifications = await Notification.find({userId:userId}) ;
+
         res.status(200).json(notifications) ;
     } catch (error) {
         res.status(404).json({message:error.message})
@@ -86,16 +87,34 @@ export const getLikeOrUnlike  =  async (req, res) => {
         }
         else{
             post.likes.set(userId,true)
-            const newNotications  = new Notification({
-                userId:post.userId,
-                postId:id,
-                firstName,
-                lastName,
-                likedOrComment:'liked',
-                friendPicturePath:picturePath,
-                
-            })
-            newNotications.save()
+            const findUser  = Notification.findOne({postId:id,userId:post.userId})
+            const isUserItself  = post.userId===id 
+            
+            if (findUser==0){
+                const newNotications  = new Notification({
+                    userId:post.userId,
+                    postId:id,
+                    firstName,
+                    lastName,
+                    likedOrComment:'liked',
+                    friendPicturePath:picturePath,
+                    
+                })
+                newNotications.save()
+            }
+            if (!isUserItself){
+                const newNotications  = new Notification({
+                    userId:post.userId,
+                    postId:id,
+                    firstName,
+                    lastName,
+                    likedOrComment:'liked',
+                    friendPicturePath:picturePath,
+                    
+                })
+                newNotications.save()
+            }
+            
             
         }
         const UpdatesPost  = await Post.findByIdAndUpdate(

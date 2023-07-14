@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Notification from "../models/notifications.js";
 
 export const getUser  = async(req,res) => {
     try {
@@ -26,6 +27,7 @@ export const getFriends = async(req,res) => {
             return { _id, firstName, lastName, occupation, location, picturePath};
           }
         );
+        
 
         res.status(200).json(formattedFriends)
 
@@ -52,6 +54,16 @@ export const getAddOrRemoveFriend = async(req,res) => {
           } else {
             user.friends.push(friendId);
             friend.friends.push(id);
+            const newFriend = new Notification({
+              userId:friendId,
+              postId:id,
+              firstName:user.firstName,
+              lastName:user.lastName,
+              friendPicturePath:user.picturePath,
+              likedOrComment:'Added',
+
+            })
+            await newFriend.save() ;
           }
           await user.save();
           await friend.save();

@@ -10,6 +10,9 @@ import { setAdvertisement, setFriendship, setIsProfileOrHome } from 'state/state
 import { useDispatch } from 'react-redux';
 import FriendList from 'scenes/widgets/FriendList';
 
+import Flexbetween from 'components/Flexbox';
+import UserNotification from 'scenes/notifications/UserNotification';
+
 
 function Home() {
   
@@ -20,6 +23,9 @@ function Home() {
   const advertisement = useSelector((state) => state.advertisement)
   const friends_list = useSelector((state) => state.friendship)
   const isProfileOrHome = useSelector((state) => state.isProfileOrHome) ;
+  const notification = useSelector((state) => state.notifications)
+  const visible = useSelector((state) => state.visible)
+  const mode = useSelector((state) => state.mode)
 
 
 
@@ -37,7 +43,7 @@ function Home() {
     const friends = await fetch(`http://localhost:5001/user/${_id}/friends`,
       {
         method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       const friendslists = await friends.json()
       console.log(friendslists)
@@ -50,12 +56,14 @@ function Home() {
     newAd();
     getFriends() ;
     dispatch(setIsProfileOrHome({isProfileOrHome:'home'})) ;
+    console.log(notification)
   },[])
 
   return (
+    <>
     <Box>
-      <Navbar />
-      <Box width={'100%'} padding='2rem 4%' display={isNonMobile ? 'flex' : 'block'} gap='0.5rem' justifyContent='space-between'>
+      <Navbar  />
+      <Box  width={'100%'} padding='2rem 4%' display={isNonMobile ? 'flex' : 'block'} position='absolute' top='70px' zindex='0' gap='0.5rem' justifyContent='space-between'>
         <Box flexBasis={isNonMobile ? '26%' : undefined} >
           <UserWidget  userId={_id} picturePath={picturePath} />
         </Box>
@@ -75,8 +83,15 @@ function Home() {
           </Box>
         </Box>
         )}
+        
       </Box>
+      <UserNotification />
+    
+    
     </Box>
+    
+    
+    </>
   )
 }
 

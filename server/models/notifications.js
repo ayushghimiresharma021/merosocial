@@ -10,7 +10,7 @@ const notificationSchema =new mongoose.Schema({
     lastName:String,
     likedOrComment:{
         type:String,
-        enum:['liked', 'comment','posted'],
+        enum:['liked', 'comment','posted','Added'],
     },
     friendPicturePath:String,
     
